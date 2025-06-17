@@ -1,4 +1,6 @@
-task_dictionary = {
+import easygui
+
+Tasks = {
     "T1": {
         "Title": "Design Homepage",
         "Description": "Create a mockup of the homepage",
@@ -53,3 +55,13 @@ Team_members = {
         "Tasks_Assigned": ["T5"]
     }
 }
+
+def menu_choice():
+    choices = ["Add Task", "Update Task", "Search Task", "Search Member\
+"]
+    menu_options = easygui.buttonbox("Welcome to the 'Task Management System \
+(TMS), pick an option", choices=choices)
+menu_choice()
+
+
+
