@@ -59,8 +59,7 @@ def menu_choice():
     choices = {
         "Add Task": add_tasks,
         "Update Task": update_task,
-        "Search Task": search_tasks,
-        "Search Member": search_members,
+        "Search Members or Tasks": search_members_or_tasks,
         "Output Tasks": print_tasks,
         "Generate Report": generate_report,
         "Logout": logout
@@ -129,9 +128,9 @@ def add_tasks():
                 task_priority = int(task_priority)
                 break
         while True:
-            status = ["In Progress", "Blocked", "Completed"]
+            status = ["In Progress", "Blocked", "Completed", "Not Started"]
             task_status = easygui.choicebox("Choose Task Status:", choices=status)
-            if task_status is None:
+            if task_status == None:
                 return  
             else:
                 break  
@@ -151,9 +150,7 @@ def add_tasks():
 
 def update_task():
     pass
-def search_tasks():
-    pass
-def search_members():
+def search_members_or_tasks():
     pass
 def print_tasks():
     output = []
@@ -164,7 +161,29 @@ def print_tasks():
         output.append("")
     easygui.msgbox("\n".join(output), title="Task Details")
 def generate_report():
-    pass
+    completed_tasks = 0
+    in_progress_tasks = 0
+    blocked_tasks = 0
+    not_started_tasks = 0
+
+    for task_id, task_info in tasks.items():
+        status = task_info["Status"]
+        if status == "Completed":
+            completed_tasks += 1
+        elif status == "In Progress":
+            in_progress_tasks += 1
+        elif status == "Blocked":
+            blocked_tasks += 1
+        elif status == "Not Started":
+            not_started_tasks += 1
+
+    report = f"Generated Project Progress Report:\n\n"
+    report += f"Number of tasks completed: {completed_tasks}\n"
+    report += f"Number of tasks in progress: {in_progress_tasks}\n"
+    report += f"Number of tasks blocked: {blocked_tasks}\n"
+    report += f"Number of tasks not started: {not_started_tasks}\n"
+
+    easygui.msgbox(report, title="Project Progress Report")
 def logout():
     pass
 
