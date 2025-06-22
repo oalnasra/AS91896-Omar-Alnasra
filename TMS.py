@@ -72,7 +72,7 @@ def menu_choice():
         user_choice = easygui.buttonbox(
             "Welcome to the 'Task Management System' (TMS), pick an option",
 choices=options)
-        if user_choice is None:
+        if user_choice == None:
             get_input = "Logout"
         elif user_choice == "Logout":
             choices["Logout"]()
@@ -149,9 +149,62 @@ def add_tasks():
         return
 
 def update_task():
-    pass
+    task_id = list(tasks.keys())
+    id_choice = easygui.choicebox("Choose the Task ID you would like to edit:", choices=task_id)
+    if id_choice == None:
+        return
+    selected_task = tasks[id_choice]
+    current_assignee = selected_task["Assignee"]
+    
+    status_update = easygui.choicebox("Select new task status:", choices=["In Progress", "Completed", "Blocked", "Not Started"])
+    if status_update == None:
+        return
+
+    member_id = list(team_members.keys())
+    new_assignee = easygui.choicebox("Assign to a team member:", choices=member_id)
+    if new_assignee == None:
+        return
+
+    if current_assignee in team_members and id_choice in team_members[current_assignee]["Tasks_Assigned"]:
+        team_members[current_assignee]["Tasks_Assigned"].remove(id_choice)
+
+    
+    if status_update != "Completed":
+        if id_choice not in team_members[new_assignee]["Tasks_Assigned"]:
+            team_members[new_assignee]["Tasks_Assigned"].append(id_choice)
+
+
+    tasks[id_choice]["Status"] = status_update
+    tasks[id_choice]["Assignee"] = new_assignee
+
+    easygui.msgbox(f"Task {id_choice} has been updated:\nStatus: {status_update}\nAssignee: {new_assignee}")
+
 def search_members_or_tasks():
-    pass
+    selected_choice = easygui.buttonbox("Search:", choices=["Task", "Team Member", "Cancel"])
+    if selected_choice is None:
+        return
+
+    if selected_choice == "Task":
+        task_titles = [task["Title"] for task in tasks.values()]
+        selected_title = easygui.choicebox("Select a Task:", choices=task_titles)
+        for task_id, task_info in tasks.items():
+            if task_info["Title"] == selected_title:
+                task_details = f"Task ID: {task_id}\n" + "\n".join(f"{key}: {value}" for key, value in task_info.items())
+                easygui.msgbox(task_details, title="Task Details")
+
+    elif selected_choice == "Team Member":
+        member_names = [member["Name"] for member in team_members.values()]
+        selected_member = easygui.choicebox("Select a Team Member:", choices=member_names)
+        for member_id, member_info in team_members.items():
+            if member_info["Name"] == selected_member:
+                assigned_tasks = member_info["Tasks_Assigned"]
+                task_assignments = [f"- {tasks[task_id]['Title']} ({task_id})" for task_id in assigned if task_id in tasks]
+                info_summary = "\n".join(assignments)
+                member_info = f"Name: {member_info['Name']} \nID: {member_id}\nEmail: {member_info['Email']}\n\nAssigned Tasks:\n{info_summary}"
+                easygui.msgbox(member_info, title="Team Member Details")
+
+
+
 def print_tasks():
     output = []
     for task_id, task_info in tasks.items():
@@ -177,12 +230,10 @@ def generate_report():
         elif status == "Not Started":
             not_started_tasks += 1
 
-    report = f"Generated Project Progress Report:\n\n"
-    report += f"Number of tasks completed: {completed_tasks}\n"
-    report += f"Number of tasks in progress: {in_progress_tasks}\n"
-    report += f"Number of tasks blocked: {blocked_tasks}\n"
-    report += f"Number of tasks not started: {not_started_tasks}\n"
-
+    report = f"Generated Progress Report:\n\nNumber of tasks completed: \
+{completed_tasks}\nNumber of tasks in progress: \
+{in_progress_tasks}\nNumber of tasks blocked: \
+{blocked_tasks}\nNumber of tasks not started: {not_started_tasks}"
     easygui.msgbox(report, title="Project Progress Report")
 def logout():
     pass
