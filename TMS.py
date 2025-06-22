@@ -179,11 +179,7 @@ def update_task():
 
     easygui.msgbox(f"Task {id_choice} has been updated:\nStatus: {status_update}\nAssignee: {new_assignee}")
 
-def search_members_or_tasks():
-    selected_choice = easygui.buttonbox("Search:", choices=["Task", "Team Member", "Cancel"])
-    if selected_choice is None:
-        return
-
+def search_tasks(selected_choice):
     if selected_choice == "Task":
         task_titles = [task["Title"] for task in tasks.values()]
         selected_title = easygui.choicebox("Select a Task:", choices=task_titles)
@@ -192,18 +188,24 @@ def search_members_or_tasks():
                 task_details = f"Task ID: {task_id}\n" + "\n".join(f"{key}: {value}" for key, value in task_info.items())
                 easygui.msgbox(task_details, title="Task Details")
 
-    elif selected_choice == "Team Member":
+def search_members(selected_choice):
+    if selected_choice == "Team Member":
         member_names = [member["Name"] for member in team_members.values()]
         selected_member = easygui.choicebox("Select a Team Member:", choices=member_names)
         for member_id, member_info in team_members.items():
             if member_info["Name"] == selected_member:
                 assigned_tasks = member_info["Tasks_Assigned"]
-                task_assignments = [f"- {tasks[task_id]['Title']} ({task_id})" for task_id in assigned if task_id in tasks]
-                info_summary = "\n".join(assignments)
+                task_assignments = [f"- {tasks[task_id]['Title']} ({task_id})" for task_id in assigned_tasks if task_id in tasks]
+                info_summary = "\n".join(task_assignments)
                 member_info = f"Name: {member_info['Name']} \nID: {member_id}\nEmail: {member_info['Email']}\n\nAssigned Tasks:\n{info_summary}"
                 easygui.msgbox(member_info, title="Team Member Details")
 
-
+def search_members_or_tasks():
+    selected_choice = easygui.buttonbox("Search:", choices=["Task", "Team Member", "Cancel"])
+    if selected_choice is None:
+        return
+    search_tasks(selected_choice)
+    search_members(selected_choice)
 
 def print_tasks():
     output = []
@@ -214,27 +216,15 @@ def print_tasks():
         output.append("")
     easygui.msgbox("\n".join(output), title="Task Details")
 def generate_report():
-    completed_tasks = 0
-    in_progress_tasks = 0
-    blocked_tasks = 0
-    not_started_tasks = 0
+    counted_status = {"Not Started": 0, "In Progress": 0, "Blocked": 0, "Completed": 0}
+    for task in tasks.values():
+        counted_status[task["Status"]] += 1
 
-    for task_id, task_info in tasks.items():
-        status = task_info["Status"]
-        if status == "Completed":
-            completed_tasks += 1
-        elif status == "In Progress":
-            in_progress_tasks += 1
-        elif status == "Blocked":
-            blocked_tasks += 1
-        elif status == "Not Started":
-            not_started_tasks += 1
-
-    report = f"Generated Progress Report:\n\nNumber of tasks completed: \
-{completed_tasks}\nNumber of tasks in progress: \
-{in_progress_tasks}\nNumber of tasks blocked: \
-{blocked_tasks}\nNumber of tasks not started: {not_started_tasks}"
-    easygui.msgbox(report, title="Project Progress Report")
+    easygui.msgbox(f"Generated Progress Report:\n\n \
+Number of tasks completed: {counted_status['Completed']}\n \
+Number of tasks in progress: {counted_status['In Progress']}\n \
+Number of tasks blocked: {counted_status['Blocked']}\n \
+Number of tasks not started: {counted_status['Not Started']}")
 def logout():
     pass
 
