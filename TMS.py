@@ -55,6 +55,7 @@ team_members = {
         "Tasks_Assigned": ["T5"]
     }
 }
+
 def menu_choice():
     choices = {
         "Add Task": add_tasks,
@@ -81,7 +82,6 @@ choices=options)
             get_input = user_choice
             choices[user_choice]()
 
-
 def add_tasks():
         while True:
             task_title = easygui.enterbox("Enter Task Title: ")
@@ -104,16 +104,16 @@ def add_tasks():
                 easygui.msgbox("Field must be filled out.")
             else:
                 break
+            
         while True:
-            task_assignee = easygui.enterbox("Enter Task Assignee: ")
-            if task_assignee == None:
-                return
-            elif task_assignee == "":
-                easygui.msgbox("Field must be filled out.")
-            elif task_assignee.isdigit():
-                easygui.msgbox("Enter a string, not just numbers.")
-            else:
-                break
+                name_to_id = {member["Name"]: member_id for member_id, member in team_members.items()}
+                team_assignees = list(name_to_id.keys())
+                selected_name = easygui.choicebox("Select Task Assignee:", choices=team_assignees)
+                if selected_name == None:
+                    return
+                else:
+                    task_assignee = name_to_id[selected_name] 
+                    break
         while True:
             task_priority = easygui.enterbox("Enter Task Priority (1 = Low, 2 = Medium, 3 = High): ")
             if task_priority == None:
@@ -156,7 +156,8 @@ def update_task():
     selected_task = tasks[id_choice]
     current_assignee = selected_task["Assignee"]
     
-    status_update = easygui.choicebox("Select new task status:", choices=["In Progress", "Completed", "Blocked", "Not Started"])
+    status_update = easygui.choicebox("Select new task status:", \
+choices=["In Progress", "Completed", "Blocked", "Not Started"])
     if status_update == None:
         return
 
@@ -168,11 +169,9 @@ def update_task():
     if current_assignee in team_members and id_choice in team_members[current_assignee]["Tasks_Assigned"]:
         team_members[current_assignee]["Tasks_Assigned"].remove(id_choice)
 
-    
     if status_update != "Completed":
         if id_choice not in team_members[new_assignee]["Tasks_Assigned"]:
             team_members[new_assignee]["Tasks_Assigned"].append(id_choice)
-
 
     tasks[id_choice]["Status"] = status_update
     tasks[id_choice]["Assignee"] = new_assignee
@@ -225,6 +224,7 @@ Number of tasks completed: {counted_status['Completed']}\n \
 Number of tasks in progress: {counted_status['In Progress']}\n \
 Number of tasks blocked: {counted_status['Blocked']}\n \
 Number of tasks not started: {counted_status['Not Started']}")
+
 def logout():
     pass
 
