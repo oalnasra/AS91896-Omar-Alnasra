@@ -81,72 +81,76 @@ choices=options)
         else:
             get_input = user_choice
             choices[user_choice]()
+def new_tasks():
+    
+    while True:
+        task_title = easygui.enterbox("Enter Task Title:")
+        if task_title == None:
+            return  
+        if task_title == "":
+            easygui.msgbox("Field must be filled out.")
+        elif task_title.isdigit():
+            easygui.msgbox("Enter a string, not just numbers.")
+        else:
+            break
+
+    
+    while True:
+        task_description = easygui.enterbox("Enter Task Description:")
+        if task_description is None:
+            return 
+        if task_description == "":
+            easygui.msgbox("Field must be filled out.")
+        elif task_description.isdigit():
+            easygui.msgbox("Enter a string, not just numbers.")
+        else:
+            break
+
+    
+    name_to_id = {member["Name"]: member_id for member_id, member in team_members.items()}
+    selected_name = easygui.choicebox("Select Task Assignee:", choices=list(name_to_id.keys()))
+    if selected_name == None:
+        return 
+    team_assignee = name_to_id[selected_name]
+
+    while True:
+        task_priority = easygui.enterbox("Enter Task Priority (1 = Low, 2 = Medium, 3 = High):")
+        if task_priority == None:
+            return 
+        elif not task_priority.isdigit():
+            easygui.msgbox("Enter a number, not string")
+        elif task_priority not in ["1", "2", "3"]:
+            easygui.msgbox("Enter a number between 1 and 3.")
+        else:
+            task_priority = int(task_priority)
+            break
+
+    
+    status = easygui.choicebox("Choose Task Status:", choices=["In Progress", "Blocked", "Completed", "Not Started"])
+    if status == None:
+        return 
+
+    return {
+        "Title": task_title,
+        "Description": task_description,
+        "Assignee": team_assignee,
+        "Priority": task_priority,
+        "Status": status
+    }
 
 def add_tasks():
-        while True:
-            task_title = easygui.enterbox("Enter Task Title: ")
-            if task_title == None:
-                return
-            elif task_title == "":
-                easygui.msgbox("Field must be filled out.") 
-            elif task_title.isdigit():
-                easygui.msgbox("Enter a string, not just numbers.")
-            else:
-                break
-        while True:
-            task_description = easygui.enterbox("Enter Task Description: ")
-            if task_description == None:
-                return
-            elif task_description.isdigit():
-                easygui.msgbox("Enter a string, not just numbers.")
-                
-            elif task_description == "":
-                easygui.msgbox("Field must be filled out.")
-            else:
-                break
-            
-        while True:
-                name_to_id = {member["Name"]: member_id for member_id, member in team_members.items()}
-                team_assignees = list(name_to_id.keys())
-                selected_name = easygui.choicebox("Select Task Assignee:", choices=team_assignees)
-                if selected_name == None:
-                    return
-                else:
-                    task_assignee = name_to_id[selected_name] 
-                    break
-        while True:
-            task_priority = easygui.enterbox("Enter Task Priority (1 = Low, 2 = Medium, 3 = High): ")
-            if task_priority == None:
-                return
-            elif task_priority == "":
-                easygui.msgbox("Field must be filled out.") 
-            elif not task_priority.isdigit():
-                easygui.msgbox("Enter a number, not string")
-            elif task_priority not in ["1", "2", "3"]:
-                easygui.msgbox("Enter a number between 1 and 3.")
-            else:
-                task_priority = int(task_priority)
-                break
-        while True:
-            status = ["In Progress", "Blocked", "Completed", "Not Started"]
-            task_status = easygui.choicebox("Choose Task Status:", choices=status)
-            if task_status == None:
-                return  
-            else:
-                break  
-
-
-        task_id = f"T{len(tasks)+1}"
-        tasks[task_id] = {
-            "Title": task_title,
-            "Description": task_description,
-            "Assignee": task_assignee,
-            "Priority": task_priority,
-            "Status": task_status
-        }
-
-        easygui.msgbox(f"Task '{task_title}' has been added with ID {task_id}.")
+    
+    validate_input = new_tasks()
+    
+    if validate_input == None:
         return
+
+    task_id = f"T{len(tasks) + 1}"
+    tasks[task_id] = validate_input
+
+    if validate_input["Assignee"] in team_members:
+        team_members[validate_input["Assignee"]]["Tasks_Assigned"].append(task_id)
+    easygui.msgbox(f"Task '{validate_input['Title']}' has been added with ID {task_id}.")
 
 def update_task():
     task_id = list(tasks.keys())
