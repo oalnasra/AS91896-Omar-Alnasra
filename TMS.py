@@ -153,34 +153,34 @@ def add_tasks():
     easygui.msgbox(f"Task '{validate_input['Title']}' has been added with ID {task_id}.")
 
 def update_task():
-    task_id = list(tasks.keys())
-    id_choice = easygui.choicebox("Choose the Task ID you would like to edit:", choices=task_id)
-    if id_choice == None:
+
+    title_to_id = {info["Title"]: task_id for task_id, info in tasks.items()}
+    title_choice = easygui.choicebox("Choose the task to edit:", choices=list(title_to_id.keys()))
+    if title_choice == None: 
         return
-    selected_task = tasks[id_choice]
-    current_assignee = selected_task["Assignee"]
+
+    status_update = easygui.choicebox("Select new status:", choices=["In Progress", "Completed", "Blocked", "Not Started"])
+    if status_update == None: 
+        return
     
-    status_update = easygui.choicebox("Select new task status:", \
-choices=["In Progress", "Completed", "Blocked", "Not Started"])
-    if status_update == None:
+    new_assignee = easygui.choicebox("Assign to team member:", choices=list(team_members.keys()))
+    if new_assignee == None: 
         return
 
-    member_id = list(team_members.keys())
-    new_assignee = easygui.choicebox("Assign to a team member:", choices=member_id)
-    if new_assignee == None:
-        return
+    task_id = title_to_id[title_choice]
+    current_assignee = tasks[task_id]['Assignee']
 
-    if current_assignee in team_members and id_choice in team_members[current_assignee]["Tasks_Assigned"]:
-        team_members[current_assignee]["Tasks_Assigned"].remove(id_choice)
+    if current_assignee in team_members and task_id in team_members[current_assignee]["Tasks_Assigned"]:
+        team_members[current_assignee]["Tasks_Assigned"].remove(task_id)
 
     if status_update != "Completed":
-        if id_choice not in team_members[new_assignee]["Tasks_Assigned"]:
-            team_members[new_assignee]["Tasks_Assigned"].append(id_choice)
+        if task_id not in team_members[new_assignee]["Tasks_Assigned"]:
+            team_members[new_assignee]["Tasks_Assigned"].append(task_id)
+    
+    tasks[task_id]["Status"] = status_update
+    tasks[task_id]["Assignee"] = new_assignee
 
-    tasks[id_choice]["Status"] = status_update
-    tasks[id_choice]["Assignee"] = new_assignee
-
-    easygui.msgbox(f"Task {id_choice} has been updated:\nStatus: {status_update}\nAssignee: {new_assignee}")
+    easygui.msgbox(f"Task '{title_choice}' has been updated.")
 
 def search_tasks(selected_choice):
     if selected_choice == "Task":
