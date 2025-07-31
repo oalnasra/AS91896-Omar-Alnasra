@@ -40,6 +40,7 @@ the company",
         "Status": "Blocked"
     }
 }
+
 # Dictionary stores the details of the Team Members and the tasks they 
 # are assigned
 team_members = {
@@ -165,54 +166,47 @@ def get_task_assignee():
         in team_members.items()
     }
 
+    assignee_options = list(assignee_name_to_id.keys()) + ["None"]
+
     # Prompts for input from choicebox with team member names.
     selected_assignee = easygui.choicebox("Select Task Assignee:", \
-    choices=list(assignee_name_to_id.keys()))
+    choices=assignee_options)
 
     # If 'Cancel' or the main window is closed, it will return to the 
     # main menu_choice function's GUI.
     if selected_assignee == None:
         return 
+
+    if selected_assignee == "None":
+        return "None"
         
     # If validation has passed, it will return the ID to the 
     # corresponding selected member name.
     return assignee_name_to_id[selected_assignee]
-
 
 def get_task_priority():
     """
     Prompts the user to enter a task priority and validates it.
     The priority must be a number between 1 and 3.
     """
-
     while True:
 
         # Prompts for input for task priority
-        task_priority = easygui.enterbox("Enter Task Priority \
-(1 = Low, 2 = Medium, 3 = High):")
+        task_priority = easygui.integerbox(
+            msg="Enter Task Priority (1 = Low, 2 = Medium, 3 = High):",
+            title="Task Priority",
+            lowerbound=1,
+            upperbound=3
+        )
+        
 
         # If 'Cancel' or the main window is closed it will return to the 
         # main menu_choice function's GUI
         if task_priority == None:
             return 
-
-        # Validates the input to see whether the input is not empty.
-        if task_priority == "":
-            easygui.msgbox("Field must be filled.")
-
-        # Validates the input to see whether the input is not an 
-        # string.
-        elif not task_priority.isdigit():
-            easygui.msgbox("Enter a number, not a string.")
-
-        # Validates the input to see if it fits the range 1-3
-        elif task_priority not in ["1", "2", "3"]:
-            easygui.msgbox("Enter a number between 1 and 3.")
-
-        # If validation passes, return the priority as an integer.
-        else:
-            return int(task_priority)
-
+        
+        return task_priority
+        
 def get_task_status():
     """
     Prompts the user to select a task status from a list of options:
@@ -272,9 +266,9 @@ def new_tasks():
 
 def add_tasks():
     """
-    Adds a new task to the 'tasks' dictionary. After receiving the details
-    from the new_task function, it then assigns a new task ID and adds 
-    the details to the 'tasks' dictionary.
+    Adds a new task to the 'tasks' dictionary. After receiving the 
+    details from the new_task function, it then assigns a new task ID 
+    and adds the details to the 'tasks' dictionary.
     """
 
     # Gets all the task details for the new task
@@ -290,7 +284,8 @@ def add_tasks():
     tasks[task_id] = task_data
 
     # Adds the new task ID to the selected assignees assigned tasks
-    if task_data["Assignee"] in team_members:
+    if task_data["Status"] != "Completed" and task_data["Assignee"] \
+        in team_members:
         team_members[task_data["Assignee"]]\
         ["Tasks_Assigned"].append(task_id)
     easygui.msgbox(f"Task '{task_data['Title']}' \
@@ -305,8 +300,8 @@ def update_task_title(task_id):
         # Prompts for new input for the task title
         updated_title = easygui.enterbox("Enter New Task Title:")
 
-        # If 'Cancel' or the main window is closed, it will return to the 
-        # main menu_choice function's GUI.
+        # If 'Cancel' or the main window is closed, it will return to 
+        # the main menu_choice function's GUI.
         if updated_title == None:
             return
 
@@ -332,12 +327,12 @@ def update_task_description(task_id):
     validates the new input on whether its an integer or empty
     """
     while True:
-        # Prompts for new input for the task title
+        # Prompts for new input for the task description
         updated_description = easygui.enterbox("Enter New Task \
-        Description:")
+Description:")
 
-        # If 'Cancel' or the main window is closed, it will return to the 
-        # main menu_choice function's GUI.
+        # If 'Cancel' or the main window is closed, it will return to 
+        # the main menu_choice function's GUI.
         if updated_description == None:
             return
 
@@ -350,7 +345,8 @@ def update_task_description(task_id):
         elif updated_description.isdigit():
             easygui.msgbox("Enter a string, not just numbers.")
 
-        # If validated, it will update the title and exit the loop
+        # If validated, it will update the description and exit the 
+        # loop.
         else:
             tasks[task_id]["Description"] = updated_description
             easygui.msgbox("Task Description has been updated.")
@@ -363,36 +359,25 @@ def update_task_priority(task_id):
     validates the new input on whether its an string or empty
     """
     while True:
-        # Prompts for new input for the task title
-        updated_priority = easygui.enterbox("Enter New Task Priority \
-(1 = Low, 2 = Med, 3 = High):")
+        # Prompts for new input for the task priority
+        updated_priority = easygui.integerbox(
+            msg="Enter New Task Priority (1 = Low, 2 = Medium, \
+3 = High):",
+            title="Updated_Task_Priority",
+            lowerbound=1,
+            upperbound=3
+        )
 
         # If 'Cancel' or the main window is closed, it will return to 
         # the update_task function's GUI.
         if updated_priority == None:
-            return
+            return  
 
-        # Validates the new input to see whether the input is not empty.
-        if updated_priority == "":
-            easygui.msgbox("Field must be filled.")
-
-        # Validates the input to see whether the input is an
-        # string.
-        elif not updated_priority.isdigit():
-            easygui.msgbox("Enter a number, not a string.")
-
-        # Validates the new input, to see whether the input in within the
-        # 1 to 3 range.
-        elif updated_priority not in ["1", "2", "3"]:
-            easygui.msgbox("Enter a number between 1 and 3.")
-
-         # If validation passes, it will exit the loop and
-         # return the priority as an integer.
-        else:
-            tasks[task_id]["Priority"] = int(updated_priority)
-            easygui.msgbox("Task Priority has been updated.")
-            break
-
+        # If validation passes, it will exit the loop and
+        # return the priority as an integer.
+        tasks[task_id]["Priority"] = updated_priority  
+        easygui.msgbox("Task Priority has been updated.")
+        break
 
 def update_task_status(task_id):
     """
@@ -427,7 +412,7 @@ def update_task_status(task_id):
             team_members[current_assignee_id]\
             ["Tasks_Assigned"].remove(task_id)
     # If the status is not "Completed", ensure the task is
-    #  in the task assignee's list
+    #  in the task assignee's list by appending the value
     else:
         if current_assignee_id in team_members and task_id \
                 not in team_members[current_assignee_id]\
@@ -450,8 +435,8 @@ def update_task_assignee(task_id):
 
     # Creates a dictionary to attach team member names to their 
     # corresponding IDs.
-    assignee_name_to_id = {member["Name"]: member_id for member_id, member in \
-    team_members.items()}
+    assignee_name_to_id = {member["Name"]: member_id for member_id, \
+    member in team_members.items()}
     assignee_name_options = list(assignee_name_to_id.keys())
 
     # Prompts selection of a new assignee.
@@ -491,9 +476,10 @@ selected.")
             team_members[new_assignee_id]\
                 ["Tasks_Assigned"].append(task_id)
 
-    
+    # Displays message to show that the Task Assignee Update has been 
+    # Completed
     easygui.msgbox(f"Task assignee has been updated to \
-    {selected_assignee}.")
+{selected_assignee}.")
 
 
 def finish_update():
@@ -628,11 +614,18 @@ def get_members_tasks(member_info):
     # Creates a list and formats the strings for each members task
     task_assignments = [
         f"- {tasks[task_id]['Title']} ({task_id})"
-        for task_id in assigned_tasks if task_id in tasks
+        for task_id in assigned_tasks
+        if task_id in tasks and tasks[task_id]["Status"] != "Completed"
     ]
+
     # Joins the list into a single string 
     return "\n".join(task_assignments)
        
+    assigned_tasks = member_info["Tasks_Assigned"]
+
+   
+        
+   
 
 def search_members(search_choice):
     """
@@ -690,11 +683,12 @@ def print_tasks():
 
     # Loops over each task in the tasks dictionary.
     for task_id, task_info in tasks.items():
-        output_details.append(f"--- {task_info['Title']} ({task_id}) ---")
+        output_details.append(f"--- {task_info['Title']} ({task_id}) \
+---")
          # Loop through the details (key and value) of the current task.
         for key, value in task_info.items():
             output_details.append(f"{key}: {value}")
-            
+
         # Adds a blank line for better readability between tasks.
         output_details.append("")
     easygui.msgbox("\n".join(output_details), title="Task Details")
@@ -703,7 +697,6 @@ def generate_report():
     """
      Generates a summary report of the number of tasks in each status.
     """
-
     # Creates a dictionary to count statuses.
     status_counts = {"Not Started": 0, \
     "In Progress": 0, "Blocked": 0, "Completed": 0}
@@ -720,7 +713,9 @@ Number of tasks blocked: {status_counts['Blocked']}\n \
 Number of tasks not started: {status_counts['Not Started']}")
 
 def logout():
-        """Exits the program."""
+        """
+        Exits the program.
+        """
         exit()
 
 menu_choice() 
